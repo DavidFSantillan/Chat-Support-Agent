@@ -1,1 +1,8 @@
-"ChatBot AI Support Agent( RAG +Ticket Scalation)" 
+AI Support Agent
+
+Features
+- RAG over company documentation
+- Automated customer support
+- Vector search
+- Ticket escalation
+- API integration
