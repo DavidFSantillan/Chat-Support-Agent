@@ -142,7 +142,7 @@ async def chat_endpoint(request: ChatRequest,
 async def health_check():
     """Endpoint to check the health status of the API
     """
-    from app.core.config import get_ettings
+    from app.core.config import get_settings
     settings = get_settings()
     return HelthCheckResponse(status="ok", version=settings.app_version, uptime=12345.67)
 

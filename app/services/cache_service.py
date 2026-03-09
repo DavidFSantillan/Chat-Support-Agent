@@ -14,7 +14,7 @@ class CacheService:
     """Cache service using Redis as the backend"""
     def __init__(self):
         self.redis_client = redis.from_url(settings.redis_url,
-                                           encodfing="utf-8",
+                                           encoding="utf-8",
                                            decode_responses=True )
     
     def make_key(self, query: str) -> str:
@@ -47,9 +47,9 @@ class CacheService:
         try:
             await self.redis_client.setex(
                 name=key,
-                time=settings.CACHE_TTL_SECONDS,
+                time=settings.cache_ttl_seconds,
                 value=json.dumps(response_data, ensure_ascii=False))
-            logger.info(f"Cache stored for {settings.CACHE_TTL_SECONDS}s")
+            logger.info(f"Cache stored for {settings.cache_ttl_seconds}s")
         except Exception as e:
             logger.error(f"Error setting cache: {e}")
 
