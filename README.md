@@ -69,7 +69,13 @@ scripts/ingest_docs.py    # Document ingestion pipeline
 tests/test_api.py         # API tests
 requirements.txt
 ```
-
+![Python](https://img.shields.io/badge/Python-3.10-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge&logo=fastapi&logoColor=white)
+![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o--mini-412991?style=for-the-badge&logo=openai&logoColor=white)
+![Pinecone](https://img.shields.io/badge/Pinecone-Vector_DB-00B388?style=for-the-badge&logo=pinecone&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-Cache-DC382D?style=for-the-badge&logo=redis&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
+![pytest](https://img.shields.io/badge/Tests-8%20passing-2CA5E0?style=for-the-badge&logo=pytest&logoColor=white)
 ## Quick Start
 
 ### 1. Clone and install
