@@ -1,8 +1,15 @@
-# AI Support Agent (RAG)
+# Chat Support Agent (RAG)
+![Chat Support Agent Workflow Banner](assets/Banner.jpg)
 
 Production-style customer support backend built with FastAPI, OpenAI, Pinecone, Redis, and Supabase.
 
 The service answers user questions from internal documentation using Retrieval-Augmented Generation (RAG). If confidence is low, it automatically escalates to a support ticket workflow.
+
+## The problem it solves
+
+Every support team has the same issue: customers ask the same questions over and over. How do I cancel? What payment methods do you accept? How do I reset my password?
+A human has to read each one, find the answer in some internal doc, and type a response. It's repetitive, slow, and expensive.
+This agent handles those automatically. The tricky questions — the ones that actually need a human — get escalated to a ticket with the full conversation context already attached.
 
 ## Why This Project
 
@@ -17,14 +24,22 @@ This project demonstrates practical backend AI engineering patterns that are rel
 
 ## Architecture
 
-```text
-User -> FastAPI (/api/v1/chat)
-     -> Redis cache lookup
-       -> hit: return cached answer
-       -> miss: RAG pipeline
-            -> Retriever (Pinecone)
-            -> Generator (OpenAI)
-            -> if cannot answer: create support ticket
+```mermaid
+flowchart TD
+    A[POST /api/v1/chat\nChatRequest] --> B[chat_endpoint]
+    B --> C{cache_service.get\nMD5 query hash}
+    C -- Cache Hit --> D[ChatResponse\nfrom_cache: true]
+    C -- Cache Miss --> E[RAGGenerator.generate\nquery + history]
+    E --> F[DocumentRetriever.retrieve\nget_embedding - OpenAI]
+    F --> G[index.query\nPinecone top_k=5]
+    G --> H{query_answer\nscore >= threshold}
+    H -- can_answer: true --> I[_build_context\ndocs + scores]
+    I --> J[chat.completions.create\nGPT-4o-mini + SYSTEM_PROMPT]
+    J --> K[cache_service.set\nTTL: 3600s]
+    K --> L[ChatResponse\ncan_answer: true]
+    H -- can_answer: false --> M[ticket_service.create_ticket\nTicketData]
+    M --> N[SupabaseBackend\nPOST support_tickets]
+    N --> O[ChatResponse\nticket_id + ticket_created: true]
 ```
 
 ## Tech Stack
@@ -60,8 +75,8 @@ requirements.txt
 ### 1. Clone and install
 
 ```bash
-git clone <your-repo-url>
-cd references
+git clone https://github.com/DavidFSantillan/Chat-Support-Agent.git
+cd Chat-Support-Agent
 
 python -m venv .venv
 # Windows PowerShell
