@@ -48,7 +48,7 @@ class SupabaseTicketBackend:
     async def create_ticket(self, ticket_data: TicketData) -> dict:
         """Create a support ticket in Supabase"""
         try:
-            response = await self.client.table("support_tickets").insert({
+            response = self.client.table("support_tickets").insert({
                 "user_query": ticket_data.user_query,
                 "user_email": ticket_data.user_email,
                 "user_name": ticket_data.user_name,
@@ -59,7 +59,9 @@ class SupabaseTicketBackend:
                 "status": "open"
             }).execute()
             
-            ticket_id = response.data[0].get("id") if response.data else None
+            ticket_id = None
+            if response.data and isinstance(response.data[0], dict):
+                ticket_id = response.data[0].get("id")
             logger.info(f"Support ticket created with ID: {ticket_id}")
             return {"ticket_id": ticket_id, "created": True}
         except Exception as e:

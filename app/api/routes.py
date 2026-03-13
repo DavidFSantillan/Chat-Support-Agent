@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 from pydantic import BaseModel, Field
-from app.rag.generator import ResponseGenerator
+from app.rag.generator import RAGGenerator 
 from app.services.cache_service import CacheService
 from app.services.ticket_service import TicketService
 import uuid
@@ -14,7 +14,7 @@ router = APIRouter()
 # Instances of services
 cache_service = CacheService()
 ticket_service = TicketService()
-response_generator = ResponseGenerator()
+response_generator = RAGGenerator ()
 
 # Schemas
 class ChatRequest(BaseModel):
@@ -50,18 +50,18 @@ class ChatResponse(BaseModel):
     can_answer: bool = Field(..., description="Indicates if the agent can answer the user's question")
     ticket_id: str | None = Field(None, description="ID of the created support ticket, if applicable")
     sources: list[str] = Field(default_factory=list, description="List of sources used to generate the response")
-    confidence_score: float = Field(..., description="Confidence score of the generated response")  
+    confidence: float = Field(..., description="Confidence score of the generated response")  
     from_cache: bool = Field(..., description="Indicates if the response was retrieved from cache")
     ticket_created: bool = Field(..., description="Indicates if a support ticket was created for this conversation")    
     class Config:
         json_schema_extra = {
             "example": {  
                 "conversation_id": "123e4567-e89b-12d3-a456-426614174000",
-                "response": "Sure, I can help you with that. Can you please provide your order number?",
+                "answer": "Sure, I can help you with that. Can you please provide your order number?",
                 "can_answer": True,
                 "ticket_id": None,
                 "sources": ["knowledge_base_article_123", "previous_conversation_456"],
-                "confidence_score": 0.95,
+                "confidence": 0.95,
                 "from_cache": False,
                 "ticket_created": False
             }
@@ -125,14 +125,15 @@ async def chat_endpoint(request: ChatRequest,
     # Asamble response with ticket information
     response_data = {
         "conversation_id": conversation_id,
-        "response": result["response"],
+        "response": result["answer"],
         "can_answer": result["can_answer"],  
         "ticket_id": ticket_id,
         "ticket_created": ticket_created,
         "sources": result["sources"],
-        "confidence_score": result["confidence_score"],
+        "confidence": result["confidence"],
         "from_cache": False
     }   
+    
     # Cache the response for future requests
     if result["can_answer"]:
         background_tasks.add_task(cache_service.set, request.message, response_data)
@@ -145,7 +146,6 @@ async def health_check():
     from app.core.config import get_settings
     settings = get_settings()
     return HelthCheckResponse(status="ok", version=settings.app_version, uptime=12345.67)
-
 @router.delete("/cache", summary="Clear cache", description="Endpoint to clear the response cache")
 async def clear_cache():
     """Endpoint to clear the response cache
